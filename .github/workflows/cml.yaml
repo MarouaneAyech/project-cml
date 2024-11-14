@@ -1,5 +1,6 @@
-name: your-workflow-name
+name: churn-imbalanced-dataset
 on: [push]
+permissions: write-all
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -13,22 +14,25 @@ jobs:
           python-version: '3.x'
       - uses: iterative/setup-cml@v1
 
-      - name: prepare environment
+
+      - name: Prepare Environment
         run: |
           # Your ML workflow goes here
-          python -m pip install --upgrade
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
           python script.py
 
-      - name: Write CML report
+      - name: Generate Report
         env:
           REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "## Metrics" > report.md
-          awk 'NR%4 {print "   " $0}{print ""}' metrics.txt >> report.md
-          echo "## Confusion Matrix" >>  report.md
-          echo "![](./conf_matrix.png)" >> report.md
 
-          # Post reports as comments in GitHub PRs
-          cat results.txt >> report.md
+          # Get the report
+          echo "## Metrics" > report.md
+          # cat metrics.txt >> report.md
+          
+          awk 'NR%4{print "    " $0}{print ""}' metrics.txt >> report.md
+
+          echo "## Confusion Matrix" >> report.md
+          echo "![](./conf_matrix.png)" >> report.md
           cml comment create report.md
